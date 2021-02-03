@@ -39,7 +39,7 @@
 `php yii referral/count-referral -pid=82824897 -refdir=1`
 
 
-#### referral/countlevel
+#### referral/count-level
 Посчитать количество уровней реферальной сетки:
 (-pid - обязательный параметр) Пример:
 

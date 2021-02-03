@@ -18,11 +18,13 @@ class ReferralController extends Controller
     private $timeLogs;
     private $treeDataToPrint = '';
     private $startTimeScript;
+    public $tree;
 
     public function init()
     {
-        parent::init();
         $this->startTimeScript = microtime(true);
+        parent::init();
+        $this->tree = new Tree($this->id, $this->module);
     }
 
     /**
@@ -52,37 +54,7 @@ class ReferralController extends Controller
 
     public function actionIndex()
     {
-        $this->stdout("\n\n");
-        $this->stdout("|-----------------------------------------------|\n");
-        $this->stdout("| Exp23                                         |\n");
-        $this->stdout("|-----------------------------------------------|\n");
-
-        $this->stdout("\nКоманды:\n", Console::BOLD);
-
-        $this->stdout("\nreferral/build-tree", Console::FG_YELLOW);
-        $this->stdout("\nПостроить дерево рефералов на основе поля partner_id таблицы Users:\n", Console::FG_GREY);
-        $this->stdout("(-pid - обязательный параметр) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/build-tree -pid=82824897\n\n");
-
-        $this->stdout("\nreferral/total-volume", Console::FG_YELLOW);
-        $this->stdout("\nПосчитать суммарный объем volume * coeff_h * coeff_cr по всем уровням реферальной системы за период времени:\n", Console::FG_GREY);
-        $this->stdout("(-pid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/total-volume -pid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
-
-        $this->stdout("\nreferral/total-profit", Console::FG_YELLOW);
-        $this->stdout("\nПосчитать прибыльность (сумма profit) за определенный период времени:\n", Console::FG_GREY);
-        $this->stdout("(-pid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/total-profit -pid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
-
-        $this->stdout("\nreferral/count-referral", Console::FG_YELLOW);
-        $this->stdout("\nПосчитать количество прямых рефералов и количество всех рефералов клиента:\n", Console::FG_GREY);
-        $this->stdout("(-pid - обязательный параметр, -refdir не обязательный параметр, если не указан (любое значение), то посчитает всех рефералов клиента) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/count-referral -pid=82824897 -refdir=1\n\n");
-
-        $this->stdout("\nreferral/count-level", Console::FG_YELLOW);
-        $this->stdout("\nПосчитать количество уровней реферальной сетки:\n", Console::FG_GREY);
-        $this->stdout("(-pid - обязательный параметр) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/count-level -pid=82824897\n\n");
+        echo $this->tree->help();
     }
 
     public function actionTestTree(){
@@ -219,35 +191,6 @@ class ReferralController extends Controller
                     $lvl--;
                     $parent = array_pop($parent_stack);
                 }
-            }
-        }
-    }
-
-    //@todo printBuildTree2 на удаление
-
-    /**
-     * Метод печати структуры связей потомков реферальной системы (для вывода в консоли).
-     *
-     * @param $users //массив пользователей
-     * @param $partnerId //идентификатор клиента по которому считаем реферальную сетку
-     * @param int $level // уровень, то есть вложенность рефералов меняется если находим у реферала реферала
-     */
-    protected function printBuildTree2($users, $partnerId, $level = 0)
-    {
-        foreach ($users as $userData) {
-            if ($userData['partner_id'] == $partnerId) {
-                /**
-                 * Печать веток дерева родитель - потомок.
-                 */
-                if ($level == 0) {
-                    $this->treeDataToPrint .= $this->ansiFormat('|    |-- '.$userData['client_uid']."\n", Console::FG_YELLOW);
-                } else {
-                    $this->treeDataToPrint .= $this->ansiFormat('|'.str_repeat('    |-- ', $level + 1).$userData['client_uid']."\n");
-                }
-                /**
-                 * Повтор итерации если есть потомок (Рекурсия).
-                 */
-                $this->printBuildTree($users, $userData['client_uid'], $level + 1);
             }
         }
     }
