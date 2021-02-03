@@ -2,30 +2,36 @@
 
 ## Консольное приложение на базе Yii2
 
+## Как установить
+
+`composer require lamver/exp23`
+`composer update`
+
+## Как пользоваться 
 ### Команды:
 
-#### referral/buildtree
+#### referral/build-tree
 Построить дерево рефералов на основе поля partner_id таблицы Users:
 (-pid - обязательный параметр) Пример:
 
  `php yii referral/build-tree -pid=82824897`
 
 
-#### referral/totalvolume
+#### referral/total-volume
 Посчитать суммарный объем volume * coeff_h * coeff_cr по всем уровням реферальной системы за период времени:
 (-pid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:
 
 `php yii referral/total-volume -pid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00`
 
 
-#### referral/totalprofit
+#### referral/total-profit
 Посчитать прибыльность (сумма profit) за определенный период времени:
 (-pid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:
 
 `php yii referral/total-profit -pid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00`
 
 
-#### referral/getcountreferral
+#### referral/count-referral
 Посчитать количество прямых рефералов и количество всех рефералов клиента:
 (-pid - обязательный параметр, -refdir не обязательный параметр, если не указан (любое значение), то посчитает всех рефералов клиента) Пример:
 

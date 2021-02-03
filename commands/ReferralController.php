@@ -4,6 +4,7 @@ namespace app\commands;
 
 use app\models\Referral;
 use app\models\Users;
+use app\classes\Tree;
 use yii\console\Controller;
 use yii\helpers\BaseConsole;
 use yii\helpers\Console;
@@ -82,6 +83,12 @@ class ReferralController extends Controller
         $this->stdout("\nПосчитать количество уровней реферальной сетки:\n", Console::FG_GREY);
         $this->stdout("(-pid - обязательный параметр) Пример:\n", Console::FG_GREY);
         $this->stdout("\nphp yii referral/count-level -pid=82824897\n\n");
+    }
+
+    public function actionTestTree(){
+        $this->stdout(
+            (new Tree())->printBuildTree()
+        );
     }
 
     /**
