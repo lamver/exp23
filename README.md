@@ -4,7 +4,7 @@
 
 ## Как установить
 
-`composer require lamver/exp23`
+`git clone https://github.com/lamver/exp23.git`
 
 `composer update`
 
