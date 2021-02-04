@@ -40,6 +40,7 @@ class Referral
      * Установим свойство Дата от.
      *
      * @param null $dateFrom
+     *
      * @return $this
      */
     public function setDateFrom($dateFrom = null)
@@ -53,9 +54,10 @@ class Referral
     }
 
     /**
-     * Установим свойство Дата от.
+     * Установим свойство Дата до.
      *
      * @param null $dateTo
+     *
      * @return $this
      */
     public function setDateTo($dateTo = null)

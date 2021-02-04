@@ -20,6 +20,7 @@ class ReferralMethods
      * Установим свойство указанное идентификатор пользователя.
      *
      * @param $userId
+     *
      * @return $this
      */
     public function setUserId($userId = null)
@@ -93,7 +94,7 @@ class ReferralMethods
     }
 
     /**
-     * Считаем прибыльность
+     * Считаем прибыльность.
      *
      * @return string
      */
@@ -226,7 +227,7 @@ class ReferralMethods
      */
     protected function output($text, $option = '')
     {
-        if (isset(\Yii::$app->controller) && method_exists(\Yii::$app->controller,'ansiFormat')) {
+        if (isset(\Yii::$app->controller) && method_exists(\Yii::$app->controller, 'ansiFormat')) {
             return $result = \Yii::$app->controller->ansiFormat($text, $option);
         }
 

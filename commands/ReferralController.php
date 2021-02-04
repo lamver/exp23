@@ -46,8 +46,19 @@ class ReferralController extends Controller
         ];
     }
 
+    public function rules()
+    {
+        return [
+            [['userId'], "required"],
+        ];
+    }
+
+
     public function actionIndex()
     {
+        /**
+         * Проверим подключение к базе данных
+         */
         $this->stdout("\n\n");
         $this->stdout("|-----------------------------------------------|\n");
         $this->stdout("| Exp23                                         |\n");
@@ -55,30 +66,30 @@ class ReferralController extends Controller
 
         $this->stdout("\nКоманды:\n", Console::BOLD);
 
-        $this->stdout("\nreferral/build-tree", Console::FG_YELLOW);
-        $this->stdout("\nПостроить дерево рефералов на основе поля partner_id таблицы Users:\n", Console::FG_GREY);
-        $this->stdout("(-uid - обязательный параметр) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/build-tree -uid=82824897\n\n");
+        $this->stdout("\n|  referral/build-tree", Console::FG_YELLOW);
+        $this->stdout("\n|  Построить дерево рефералов на основе поля partner_id таблицы Users:\n", Console::FG_GREY);
+        $this->stdout("|  (-uid - обязательный параметр) Пример:\n", Console::FG_GREY);
+        $this->stdout("\n|  php yii referral/build-tree -uid=82824897\n\n");
 
-        $this->stdout("\nreferral/total-volume", Console::FG_YELLOW);
-        $this->stdout("\nПосчитать суммарный объем volume * coeff_h * coeff_cr по всем уровням реферальной системы за период времени:\n", Console::FG_GREY);
-        $this->stdout("(-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/total-volume -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
+        $this->stdout("\n|  referral/total-volume", Console::FG_YELLOW);
+        $this->stdout("\n|  Посчитать суммарный объем volume * coeff_h * coeff_cr по всем уровням реферальной системы за период времени:\n", Console::FG_GREY);
+        $this->stdout("|  (-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
+        $this->stdout("\n|  php yii referral/total-volume -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
 
-        $this->stdout("\nreferral/total-profit", Console::FG_YELLOW);
-        $this->stdout("\nПосчитать прибыльность (сумма profit) за определенный период времени:\n", Console::FG_GREY);
-        $this->stdout("(-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/total-profit -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
+        $this->stdout("\n|  referral/total-profit", Console::FG_YELLOW);
+        $this->stdout("\n|  Посчитать прибыльность (сумма profit) за определенный период времени:\n", Console::FG_GREY);
+        $this->stdout("|  (-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
+        $this->stdout("\n|  php yii referral/total-profit -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
 
-        $this->stdout("\nreferral/count-referral", Console::FG_YELLOW);
-        $this->stdout("\nПосчитать количество прямых рефералов и количество всех рефералов клиента:\n", Console::FG_GREY);
-        $this->stdout("(-uid - обязательный параметр, -refdir не обязательный параметр, если не указан (любое значение), то посчитает всех рефералов клиента) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/count-referral -uid=82824897 -refdir=1\n\n");
+        $this->stdout("\n|  referral/count-referral", Console::FG_YELLOW);
+        $this->stdout("\n|  Посчитать количество прямых рефералов и количество всех рефералов клиента:\n", Console::FG_GREY);
+        $this->stdout("|  (-uid - обязательный параметр, -refdir не обязательный параметр, если не указан (любое значение), то посчитает всех рефералов клиента) Пример:\n", Console::FG_GREY);
+        $this->stdout("\n|  php yii referral/count-referral -uid=82824897 -refdir=1\n\n");
 
-        $this->stdout("\nreferral/count-level", Console::FG_YELLOW);
-        $this->stdout("\nПосчитать количество уровней реферальной сетки:\n", Console::FG_GREY);
-        $this->stdout("(-uid - обязательный параметр) Пример:\n", Console::FG_GREY);
-        $this->stdout("\nphp yii referral/count-level -uid=82824897\n\n");
+        $this->stdout("\n|  referral/count-level", Console::FG_YELLOW);
+        $this->stdout("\n|  Посчитать количество уровней реферальной сетки:\n", Console::FG_GREY);
+        $this->stdout("|  (-uid - обязательный параметр) Пример:\n", Console::FG_GREY);
+        $this->stdout("\n|  php yii referral/count-level -uid=82824897\n\n");
     }
 
     /**
@@ -138,6 +149,15 @@ class ReferralController extends Controller
         echo (new ReferralMethods())
             ->setUserId($this->userId)
             ->countLevelReferral();
+    }
+
+    public function actionError()
+    {
+        $this->stdout("\n\n test");
+        $exception = \Yii::$app->errorHandler->exception;
+        if ($exception !== null) {
+            $this->stdout('error', ['exception' => $exception]);
+        }
     }
 
     public function __destruct()
