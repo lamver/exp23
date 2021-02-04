@@ -7,7 +7,6 @@ use yii\db\Query;
 class Referral
 {
     protected $partnerId;
-    protected $maxLevelReferral = 0;
     protected $counter = 0;
 
     public $allReferrals;
@@ -19,6 +18,12 @@ class Referral
         $this->partnerId = $pid;
     }
 
+    /** @phpdoc
+     * Получим массив всех пользователей
+     * с выборкой по запрошенному id конкретного пользователя и всех у кого есть значение в колонке partner_ir.
+     *
+     * @return $this
+     */
     public function getArrayAllReferrals()
     {
         $this->allReferrals = Users::find()
@@ -31,6 +36,12 @@ class Referral
         return $this;
     }
 
+    /**
+     * Установим свойство Дата от.
+     *
+     * @param null $dateFrom
+     * @return $this
+     */
     public function setDateFrom($dateFrom = null)
     {
         if (is_null($dateFrom)) {
@@ -41,6 +52,12 @@ class Referral
         return $this;
     }
 
+    /**
+     * Установим свойство Дата от.
+     *
+     * @param null $dateTo
+     * @return $this
+     */
     public function setDateTo($dateTo = null)
     {
         if (is_null($dateTo)) {
@@ -51,6 +68,11 @@ class Referral
         return $this;
     }
 
+    /**
+     * Метод вычесления общего объема по всем рефералам.
+     *
+     * @return bool|int|mixed|string|null
+     */
     public function totalVolumeAllReferralByPartnerID()
     {
         return (new Query())
@@ -63,6 +85,11 @@ class Referral
             ->sum('(t.volume * t.coeff_h * t.coeff_cr)');
     }
 
+    /**
+     * Метод вычесления общей прибыли по всем рефералам.
+     *
+     * @return bool|int|mixed|string|null
+     */
     public function profitVolumeAllReferralByPartnerID()
     {
         return (new Query())
@@ -84,88 +111,5 @@ class Referral
             ->from(['u' => 'users'])
             ->where(['u.partner_id' => $this->partnerId])
             ->count();
-    }
-
-    /**
-     * Метод подсчета всех рефералов.
-     *
-     * @param $clientUid
-     *
-     * @return int
-     */
-    public function countReferrals($clientUid = null)
-    {
-        if ($clientUid == null) {
-            $clientUid = $this->partnerId;
-        }
-        $partners = [];
-        foreach ($this->allReferrals as $userData) {
-            $partners[$userData['partner_id']][] = $userData;
-        }
-
-        $parent = $clientUid;
-        $parent_stack = [];
-
-        if (isset($partners[$parent])) {
-            while (($current = array_shift($partners[$parent])) || ($parent != $clientUid)) {
-                if ($current) {
-                    $uid = $current['client_uid'];
-                    $this->counter++;
-                    if (!empty($partners[$uid])) {
-                        $parent_stack[] = $parent;
-                        $parent = $uid;
-                    }
-                } else {
-                    $parent = array_pop($parent_stack);
-                }
-            }
-        }
-
-        return $this->counter;
-    }
-
-    /**
-     * Метод подсчета всех рефералов.
-     *
-     * @param $clientUid
-     * @param int $level
-     *
-     * @return int
-     */
-    public function countLevelReferral($clientUid = null, $level = 0)
-    {
-        if ($clientUid == null) {
-            $clientUid = $this->partnerId;
-        }
-
-        $partners = [];
-        foreach ($this->allReferrals as $userData) {
-            $partners[$userData['partner_id']][] = $userData;
-        }
-
-        $parent = $clientUid;
-        $parent_stack = [];
-        $lvl = 1;
-
-        if (isset($partners[$parent])) {
-            while (($current = array_shift($partners[$parent])) || ($parent != $clientUid)) {
-                if ($current) {
-                    $uid = $current['client_uid'];
-                    if (!empty($partners[$uid])) {
-                        $parent_stack[] = $parent;
-                        $parent = $uid;
-                        $lvl++;
-                    }
-                } else {
-                    $lvl--;
-                    $parent = array_pop($parent_stack);
-                }
-                if ($this->maxLevelReferral < $lvl) {
-                    $this->maxLevelReferral++;
-                }
-            }
-        }
-
-        return $this->maxLevelReferral;
     }
 }

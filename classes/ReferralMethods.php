@@ -41,9 +41,7 @@ class ReferralMethods
      */
     public function printBuildTree()
     {
-        $this->users = (new Referral($this->userId))
-            ->getArrayAllReferrals()
-            ->allReferrals;
+        $this->users = $this->getUsersArray();
 
         $partners = [];
         foreach ($this->users as $userData) {
@@ -116,9 +114,34 @@ class ReferralMethods
      */
     public function countReferralByUserId()
     {
-        $countReferrals = (new Referral($this->userId))
-            ->getArrayAllReferrals()
-            ->countReferrals();
+        $this->users = $this->getUsersArray();
+
+        $partners = [];
+        foreach ($this->users as $userData) {
+            $partners[$userData['partner_id']][] = $userData;
+        }
+
+        $countReferrals = 0;
+        $parent = $this->userId;
+        $parentStack = [];
+
+        if (!isset($partners[$parent])) {
+            return false;
+        }
+
+        while (($current = array_shift($partners[$parent])) || ($parent != $this->userId)) {
+            if (!$current) {
+                $parent = array_pop($parentStack);
+                continue;
+            }
+
+            $uid = $current['client_uid'];
+            $countReferrals++;
+            if (!empty($partners[$uid])) {
+                $parentStack[] = $parent;
+                $parent = $uid;
+            }
+        }
 
         return $this->output('Всего всех рефералов: '.$countReferrals."\n");
     }
@@ -142,11 +165,55 @@ class ReferralMethods
      */
     public function countLevelReferral()
     {
-        $countLevelReferal = (new Referral($this->userId))
-            ->getArrayAllReferrals()
-            ->countLevelReferral();
+        $this->users = $this->getUsersArray();
+
+        $partners = [];
+        foreach ($this->users as $userData) {
+            $partners[$userData['partner_id']][] = $userData;
+        }
+
+        $parent = $this->userId;
+        $parentStack = [];
+        $lvl = 1;
+        $countLevelReferal = 0;
+
+        if (!isset($partners[$parent])) {
+            return false;
+        }
+
+        while (($current = array_shift($partners[$parent])) || ($parent != $this->userId)) {
+            if (!$current) {
+                $lvl--;
+                $parent = array_pop($parentStack);
+                continue;
+            }
+
+            $uid = $current['client_uid'];
+            if (!empty($partners[$uid])) {
+                $parentStack[] = $parent;
+                $parent = $uid;
+                $lvl++;
+            }
+
+            if ($countLevelReferal < $lvl) {
+                $countLevelReferal++;
+            }
+        }
 
         return $this->output('Всего уровней реферальной сетки: '.$countLevelReferal."\n");
+    }
+
+    /**
+     * Получим массив пользователей потенциально связанных
+     * с нашим userid.
+     *
+     * @return mixed
+     */
+    protected function getUsersArray()
+    {
+        return (new Referral($this->userId))
+            ->getArrayAllReferrals()
+            ->allReferrals;
     }
 
     /**
