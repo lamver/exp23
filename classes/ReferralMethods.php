@@ -132,6 +132,7 @@ class ReferralMethods
      *
      * @param $text
      * @param string $option
+     *
      * @return string
      */
     protected function output($text, $option = '')
@@ -154,6 +155,7 @@ class ReferralMethods
             $this->userId = BaseConsole::input('Введите -uid пользователя: ');
             $callBackFuncName = debug_backtrace()[1]['function'];
             $this->$callBackFuncName();
+
             return false;
         }
 
@@ -162,6 +164,7 @@ class ReferralMethods
             $this->userId = '';
             $callBackFuncName = debug_backtrace()[1]['function'];
             $this->$callBackFuncName();
+
             return false;
         }
 

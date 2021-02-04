@@ -13,9 +13,7 @@ class ReferralController extends Controller
     public $dateTo;
     public $referralDirect;
     private $timeLogs;
-    private $treeDataToPrint = '';
     private $startTimeScript;
-    private $tree;
 
     public function init()
     {
@@ -122,6 +120,7 @@ class ReferralController extends Controller
             echo (new ReferralMethods())
                 ->setUserId($this->userId)
                 ->countReferralByUserId();
+
             return true;
         }
 
