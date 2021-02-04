@@ -2,7 +2,6 @@
 
 namespace app\commands;
 
-use app\models\Referral;
 use app\classes\ReferralMethods;
 use yii\console\Controller;
 use yii\helpers\Console;
@@ -109,7 +108,9 @@ class ReferralController extends Controller
      */
     public function actionTotalProfit()
     {
-        echo (new ReferralMethods())->totalProfitByUserId();
+        echo (new ReferralMethods())
+            ->setUserId($this->userId)
+            ->totalProfitByUserId();
     }
 
     /**

@@ -4,8 +4,8 @@ namespace app\classes;
 
 use app\models\Referral;
 use app\models\Users;
-use yii\helpers\Console;
 use yii\helpers\BaseConsole;
+use yii\helpers\Console;
 
 class ReferralMethods
 {
@@ -19,6 +19,7 @@ class ReferralMethods
     public function setUserId($userId)
     {
         $this->userId = $userId;
+
         return $this;
     }
 
@@ -104,7 +105,6 @@ class ReferralMethods
             ->countReferrals();
 
         return $this->output('Всего всех рефералов: '.$countReferrals."\n");
-
     }
 
     public function countDirectReferralByUserId()
@@ -128,7 +128,7 @@ class ReferralMethods
     }
 
     /**
-     * Метод подготовки данных на вывод
+     * Метод подготовки данных на вывод.
      *
      * @param $text
      * @param string $option
