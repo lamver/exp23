@@ -92,7 +92,8 @@ class ReferralController extends Controller
     }
 
     /**
-     * Экшен получения суммарного объема volume * coeff_h * coeff_cr по всем уровням реферальной системы за период времени.
+     * Экшен получения суммарного объема volume * coeff_h * coeff_cr
+     * по всем уровням реферальной системы за период времени.
      */
     public function actionTotalVolume()
     {

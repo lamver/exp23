@@ -16,10 +16,19 @@ class ReferralMethods
     public $treeDataToPrint;
     public $outputData;
 
-    public function setUserId($userId)
+    /**
+     * Установим свойство указанное идентификатор пользователя.
+     *
+     * @param $userId
+     * @return $this
+     */
+    public function setUserId($userId = null)
     {
-        $this->userId = $userId;
+        if (!is_null($userId)) {
+            $this->userId = $userId;
+        }
 
+        $this->checkUserId();
         return $this;
     }
 
@@ -32,8 +41,6 @@ class ReferralMethods
      */
     public function printBuildTree()
     {
-        $this->checkUserId();
-
         $this->users = (new Referral($this->userId))
             ->getArrayAllReferrals()
             ->allReferrals;
@@ -72,10 +79,13 @@ class ReferralMethods
         return $treeData;
     }
 
+    /**
+     * Посчитаем Суммарный объем.
+     *
+     * @return string
+     */
     public function totalVolumeByUserId()
     {
-        $this->checkUserId();
-
         $referral = (new Referral($this->userId))
             ->setDateFrom($this->dateFrom)
             ->setDateTo($this->dateTo)
@@ -84,10 +94,13 @@ class ReferralMethods
         return $this->output("Суммарный объем: $referral\n");
     }
 
+    /**
+     * Считаем прибыльность
+     *
+     * @return string
+     */
     public function totalProfitByUserId()
     {
-        $this->checkUserId();
-
         $referral = (new Referral($this->userId))
             ->setDateFrom($this->dateFrom)
             ->setDateTo($this->dateTo)
@@ -96,10 +109,13 @@ class ReferralMethods
         return $this->output('Прибыльность: '.$referral."\n");
     }
 
+    /**
+     * Считаем всего всех рефералов.
+     *
+     * @return string
+     */
     public function countReferralByUserId()
     {
-        $this->checkUserId();
-
         $countReferrals = (new Referral($this->userId))
             ->getArrayAllReferrals()
             ->countReferrals();
@@ -107,24 +123,30 @@ class ReferralMethods
         return $this->output('Всего всех рефералов: '.$countReferrals."\n");
     }
 
+    /**
+     * Считаем прямых рефералов.
+     *
+     * @return string
+     */
     public function countDirectReferralByUserId()
     {
-        $this->checkUserId();
         $countReferrals = (new Referral($this->userId))
             ->getArrayAllReferrals()
             ->countDirectReferral();
 
-        return $this->output('Всего всех рефералов: '.$countReferrals."\n");
+        return $this->output('Всего прямых рефералов: '.$countReferrals."\n");
     }
 
+    /**
+     * Всего уровней реферальной сетки.
+     */
     public function countLevelReferral()
     {
-        $this->checkUserId();
         $countLevelReferal = (new Referral($this->userId))
             ->getArrayAllReferrals()
             ->countLevelReferral();
 
-        return $this->output('Всего всех рефералов: '.$countLevelReferal."\n");
+        return $this->output('Всего уровней реферальной сетки: '.$countLevelReferal."\n");
     }
 
     /**
@@ -137,7 +159,11 @@ class ReferralMethods
      */
     protected function output($text, $option = '')
     {
-        return $result = \Yii::$app->controller->ansiFormat($text, $option);
+        if (isset(\Yii::$app->controller) && method_exists(\Yii::$app->controller,'ansiFormat')) {
+            return $result = \Yii::$app->controller->ansiFormat($text, $option);
+        }
+
+        return $text;
     }
 
     /**
@@ -151,7 +177,7 @@ class ReferralMethods
                 exit();
             }
 
-            \Yii::$app->controller->stdout("-uid не может быть пустым и должен содержать число (enter q to exit) \n", Console::FG_RED);
+            $this->output("-uid не может быть пустым и должен содержать число (enter q to exit) \n", Console::FG_RED);
             $this->userId = BaseConsole::input('Введите -uid пользователя: ');
             $callBackFuncName = debug_backtrace()[1]['function'];
             $this->$callBackFuncName();
@@ -160,7 +186,7 @@ class ReferralMethods
         }
 
         if (Users::find()->where(['client_uid' => $this->userId])->count() == 0) {
-            \Yii::$app->controller->stdout("Пользователь с данным идентификатором не найден! \n", Console::FG_RED);
+            $this->output("Пользователь с данным идентификатором не найден! \n", Console::FG_RED);
             $this->userId = '';
             $callBackFuncName = debug_backtrace()[1]['function'];
             $this->$callBackFuncName();
