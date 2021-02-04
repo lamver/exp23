@@ -3,28 +3,25 @@
 namespace app\commands;
 
 use app\models\Referral;
-use app\models\Users;
-use app\classes\Tree;
+use app\classes\ReferralMethods;
 use yii\console\Controller;
-use yii\helpers\BaseConsole;
 use yii\helpers\Console;
 
 class ReferralController extends Controller
 {
-    public $partnerId;
+    public $userId;
     public $dateFrom;
     public $dateTo;
     public $referralDirect;
     private $timeLogs;
     private $treeDataToPrint = '';
     private $startTimeScript;
-    public $tree;
+    private $tree;
 
     public function init()
     {
         $this->startTimeScript = microtime(true);
         parent::init();
-        $this->tree = new Tree($this->id, $this->module);
     }
 
     /**
@@ -35,7 +32,7 @@ class ReferralController extends Controller
     public function options($actionID)
     {
         return [
-            'partnerId',
+            'userId',
             'dateFrom',
             'dateTo',
             'referralDirect',
@@ -45,7 +42,7 @@ class ReferralController extends Controller
     public function optionAliases()
     {
         return [
-            'pid'    => 'partnerId',
+            'uid'    => 'userId',
             'dfrom'  => 'dateFrom',
             'dto'    => 'dateTo',
             'refdir' => 'referralDirect',
@@ -54,13 +51,37 @@ class ReferralController extends Controller
 
     public function actionIndex()
     {
-        echo $this->tree->help();
-    }
+        $this->stdout("\n\n");
+        $this->stdout("|-----------------------------------------------|\n");
+        $this->stdout("| Exp23                                         |\n");
+        $this->stdout("|-----------------------------------------------|\n");
 
-    public function actionTestTree(){
-        $this->stdout(
-            (new Tree())->printBuildTree()
-        );
+        $this->stdout("\nКоманды:\n", Console::BOLD);
+
+        $this->stdout("\nreferral/build-tree", Console::FG_YELLOW);
+        $this->stdout("\nПостроить дерево рефералов на основе поля partner_id таблицы Users:\n", Console::FG_GREY);
+        $this->stdout("(-uid - обязательный параметр) Пример:\n", Console::FG_GREY);
+        $this->stdout("\nphp yii referral/build-tree -uid=82824897\n\n");
+
+        $this->stdout("\nreferral/total-volume", Console::FG_YELLOW);
+        $this->stdout("\nПосчитать суммарный объем volume * coeff_h * coeff_cr по всем уровням реферальной системы за период времени:\n", Console::FG_GREY);
+        $this->stdout("(-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
+        $this->stdout("\nphp yii referral/total-volume -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
+
+        $this->stdout("\nreferral/total-profit", Console::FG_YELLOW);
+        $this->stdout("\nПосчитать прибыльность (сумма profit) за определенный период времени:\n", Console::FG_GREY);
+        $this->stdout("(-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
+        $this->stdout("\nphp yii referral/total-profit -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
+
+        $this->stdout("\nreferral/count-referral", Console::FG_YELLOW);
+        $this->stdout("\nПосчитать количество прямых рефералов и количество всех рефералов клиента:\n", Console::FG_GREY);
+        $this->stdout("(-uid - обязательный параметр, -refdir не обязательный параметр, если не указан (любое значение), то посчитает всех рефералов клиента) Пример:\n", Console::FG_GREY);
+        $this->stdout("\nphp yii referral/count-referral -uid=82824897 -refdir=1\n\n");
+
+        $this->stdout("\nreferral/count-level", Console::FG_YELLOW);
+        $this->stdout("\nПосчитать количество уровней реферальной сетки:\n", Console::FG_GREY);
+        $this->stdout("(-uid - обязательный параметр) Пример:\n", Console::FG_GREY);
+        $this->stdout("\nphp yii referral/count-level -uid=82824897\n\n");
     }
 
     /**
@@ -68,23 +89,9 @@ class ReferralController extends Controller
      */
     public function actionBuildTree()
     {
-        $this->checkPartnerId();
-
-        $allReferalls = (new Referral($this->partnerId))
-            ->getArrayAllReferrals()
-            ->allReferrals;
-
-        $this->timeLogs .= 'Get referrals (MySQL query) '.(microtime(true) - $this->startTimeScript)."\n";
-
-        $this->printBuildTree($allReferalls, $this->partnerId);
-
-        if ($this->treeDataToPrint == '') {
-            $this->stdout("Notice: partner_id or referrals not found\n", Console::FG_YELLOW);
-        } else {
-            $this->stdout($this->treeDataToPrint);
-            $this->stdout("Success\n", Console::FG_GREEN);
-            $this->timeLogs .= 'Build tree print '.(microtime(true) - $this->startTimeScript)."\n";
-        }
+        echo (new ReferralMethods())
+            ->setUserId($this->userId)
+            ->printBuildTree();
     }
 
     /**
@@ -92,16 +99,9 @@ class ReferralController extends Controller
      */
     public function actionTotalVolume()
     {
-        $this->checkPartnerId();
-
-        $referral = (new Referral($this->partnerId))
-            ->setDateFrom($this->dateFrom)
-            ->setDateTo($this->dateTo)
-            ->totalVolumeAllReferralByPartnerID();
-
-        $this->stdout('Суммарный объем: '.$referral."\n");
-
-        $this->timeLogs .= 'Get referrals (MySQL query) '.(microtime(true) - $this->startTimeScript)."\n";
+        echo (new ReferralMethods())
+            ->setUserId($this->userId)
+            ->totalVolumeByUserId();
     }
 
     /**
@@ -109,16 +109,7 @@ class ReferralController extends Controller
      */
     public function actionTotalProfit()
     {
-        $this->checkPartnerId();
-
-        $referral = (new Referral($this->partnerId))
-            ->setDateFrom($this->dateFrom)
-            ->setDateTo($this->dateTo)
-            ->profitVolumeAllReferralByPartnerID();
-
-        $this->stdout('Прибыльность: '.$referral."\n");
-
-        $this->timeLogs .= 'Get referrals (MySQL query) '.(microtime(true) - $this->startTimeScript)."\n";
+        echo (new ReferralMethods())->totalProfitByUserId();
     }
 
     /**
@@ -126,20 +117,16 @@ class ReferralController extends Controller
      */
     public function actionCountReferral()
     {
-        $this->checkPartnerId();
-
         if (empty($this->referralDirect)) {
-            $countReferrals = (new Referral($this->partnerId))
-                ->getArrayAllReferrals()
-                ->countReferrals();
-            $this->stdout('Всего всех рефералов: '.$countReferrals."\n");
-        } else {
-            $countDirectReferrals = (new Referral($this->partnerId))
-                ->countDirectReferral();
-            $this->stdout('Всего прямых рефералов: '.$countDirectReferrals."\n");
+            echo (new ReferralMethods())
+                ->setUserId($this->userId)
+                ->countReferralByUserId();
+            return true;
         }
 
-        $this->timeLogs .= 'Get referrals (MySQL query) '.(microtime(true) - $this->startTimeScript)."\n";
+        echo (new ReferralMethods())
+            ->setUserId($this->userId)
+            ->countDirectReferralByUserId();
     }
 
     /**
@@ -147,80 +134,9 @@ class ReferralController extends Controller
      */
     public function actionCountLevel()
     {
-        $this->checkPartnerId();
-        $countLevelReferal = (new Referral($this->partnerId))
-            ->getArrayAllReferrals()
+        echo (new ReferralMethods())
+            ->setUserId($this->userId)
             ->countLevelReferral();
-
-        $this->timeLogs .= 'Get referrals (MySQL query) '.(microtime(true) - $this->startTimeScript)."\n";
-
-        $this->stdout('Всего уровней реферальной сетки: '.$countLevelReferal."\n");
-    }
-
-    /**
-     * Дерево рефералов без рекурсии, строится циклом
-     * Метод печати структуры связей потомков реферальной системы (для вывода в консоли).
-     *
-     * @param $users
-     * @param $client_uid
-     */
-    protected function printBuildTree($users, $client_uid)
-    {
-        $partners = [];
-        foreach ($users as $userData) {
-            $partners[$userData['partner_id']][] = $userData;
-        }
-
-        $parent = $client_uid;
-        $parent_stack = [];
-        $lvl = 1;
-
-        $this->treeDataToPrint .= $this->ansiFormat("|-- $client_uid\n", Console::FG_YELLOW);
-
-        if (isset($partners[$parent])) {
-            while (($current = array_shift($partners[$parent])) || ($parent != $client_uid)) {
-                if ($current) {
-                    $uid = $current['client_uid'];
-                    $this->treeDataToPrint .= $this->ansiFormat('|'.str_repeat('   |-- ', $lvl)."$uid\n", Console::FG_GREY);
-                    if (!empty($partners[$uid])) {
-                        $parent_stack[] = $parent;
-                        $parent = $uid;
-                        $lvl++;
-                    }
-                } else {
-                    $lvl--;
-                    $parent = array_pop($parent_stack);
-                }
-            }
-        }
-    }
-
-    /**
-     * Функция проверки на пустоту и валидность partnerId
-     * Открытие диалога на ввод partnerId в случае не удачи.
-     */
-    protected function checkPartnerId()
-    {
-        if (empty($this->partnerId) || is_numeric($this->partnerId) === false) {
-            if ($this->partnerId == 'q') {
-                exit();
-            }
-            $this->stdout("-pid не может быть пустым и должен содержать число (enter q to exit) \n", Console::FG_RED);
-            $this->partnerId = BaseConsole::input('Введите -pid пользователя: ');
-            $callBackFuncName = debug_backtrace()[1]['function'];
-            $this->$callBackFuncName();
-            exit();
-        }
-
-        if (Users::find()->where(['client_uid' => $this->partnerId])->count() == 0) {
-            $this->stdout("Пользователь с данным идентификатором не найден! \n", Console::FG_RED);
-            $this->partnerId = '';
-            $callBackFuncName = debug_backtrace()[1]['function'];
-            $this->$callBackFuncName();
-            exit();
-        }
-
-        return $this;
     }
 
     public function __destruct()
