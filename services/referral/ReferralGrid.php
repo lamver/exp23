@@ -1,335 +1,142 @@
 <?php
 
-    namespace app\services\referral;
+namespace app\services\referral;
 
-    use app\models\Referral;
-    use app\models\Users;
-    use yii\helpers\BaseConsole;
-    use yii\helpers\Console;
+use app\models\User;
+use app\services\referral\calculator\ReferralMetrika;
+use yii;
 
-    class ReferralGrid
+class ReferralGrid
+{
+    protected $users = [];
+    protected $userId;
+    public $dateFrom;
+    public $dateTo;
+
+    /**
+     * Установим свойство указанное идентификатор пользователя.
+     *
+     * @param $userId
+     *
+     * @return $this
+     */
+    public function setUserId(int $userId)
     {
-        protected $users = [];
-        protected $userId;
-        public $dateFrom;
-        public $dateTo;
-        public $treeDataToPrint;
-        public $outputData;
+        $this->userId = $userId;
 
+        if (!$this->existsUserId()) {
+            //throw new NotFoundException('User not found.');
+            throw new yii\console\Exception("\n\n       Пользователь не найден!\n\n");
+        }
         /**
-         * Установим свойство указанное идентификатор пользователя.
-         *
-         * @param $userId
-         *
-         * @return $this
+         * todo Обработать исключение если не найден $userId
          */
-        public function setUserId($userId = null)
-        {
-            if (!is_null($userId)) {
-                $this->userId = $userId;
-            }
+        return $this;
+    }
 
-            $this->checkUserId();
-            return $this;
+    /**
+     * Получим всех потомков укзанного пользователя
+     *
+     * @return array
+     */
+    public function getChildNodesByUserId()
+    {
+        $this->users = $this->getUsersArrayHasRefferals();
+        return $this->buildChildNodesByUsersArray( $this->users, $this->userId);
+    }
+
+    /**
+     * Построим многомерный массив потомков указанного пользователя.
+     *
+     * @param array $users
+     * @param int $parentId
+     * @return array
+     */
+    public function buildChildNodesByUsersArray(array &$users, $parentId = 0) : array
+    {
+        $node = [];
+
+        foreach ($users as &$userData) {
+            if ($userData['partner_id'] == $parentId) {
+                $children = $this->buildChildNodesByUsersArray($users, $userData['client_uid']);
+                if ($children) {
+                    $userData['children'] = $children;
+                }
+                $node[$userData['client_uid']] = $userData;
+                unset($userData);
+            }
         }
 
-        /**
-         * Дерево рефералов без рекурсии, строится циклом
-         * Метод печати структуры связей потомков реферальной системы (для вывода в консоли).
-         *
-         * @param $users
-         * @param $client_uid
-         */
-        public function printBuildTree()
-        {
-            $this->users = $this->getUsersArray();
+        return $node;
+    }
 
-            $partners = [];
-            foreach ($this->users as $userData) {
-                $partners[$userData['partner_id']][] = $userData;
-            }
+    /**
+     * Считаем Суммарный объем.
+     *
+     * @return string
+     */
+    public function totalVolumeByUserId($dateFrom = null, $dateTo = null)
+    {
+        return (new ReferralMetrika())->totalVolumeByUserId($this->userId, $dateFrom, $dateTo);
+    }
 
-            $parent = $this->userId;
-            $parentStack = [];
-            $lvl = 1;
+    /**
+     * Получим прибыльность по всем рефералам
+     *
+     * @return string
+     */
+    public function totalProfitByUserId($dateFrom = null, $dateTo = null)
+    {
+        return (new ReferralMetrika())->sumProfitByUsersIDsAndBetweenDateTime($this->userId, $dateFrom, $dateTo);
+    }
 
-            $treeData = $this->output("|-- $this->userId\n", Console::FG_YELLOW);
+    /**
+     * Считаем всего всех рефералов.
+     *
+     * @return string
+     */
+    public function countReferralByUserId()
+    {
+        return (new ReferralMetrika())->countReferralByUserId($this->userId);
+    }
 
-            if (!isset($partners[$parent])) {
-                return false;
-            }
+    /**
+     * Считаем прямых рефералов.
+     *
+     * @return string
+     */
+    public function countDirectReferralByUserId()
+    {
+        return (new ReferralMetrika())->countDirectReferral($this->userId);
+    }
 
-            while (($current = array_shift($partners[$parent])) || ($parent != $this->userId)) {
-                if (!$current) {
-                    $lvl--;
-                    $parent = array_pop($parentStack);
-                    continue;
-                }
+    /**
+     * Считаем количество уровней реферальной сетки.
+     */
+    public function countLevelReferral()
+    {
+        return (new ReferralMetrika())->countLevelsReferalToUserId($this->userId);
+    }
 
-                $uid = $current['client_uid'];
-                $treeData .= $this->output('|'.str_repeat('   |-- ', $lvl)."$uid\n", Console::FG_GREY);
-                if (!empty($partners[$uid])) {
-                    $parentStack[] = $parent;
-                    $parent = $uid;
-                    $lvl++;
-                }
-            }
+    /**
+     * Получим массив пользователей потенциально связанных
+     * с нашим userid.
+     *
+     * @return mixed
+     */
+    public function getUsersArrayHasRefferals()
+    {
+        return User::getArrayHasReferralsBy($this->userId);
+    }
 
-            return $treeData;
-        }
-
-        /**
-         * Посчитаем Суммарный объем.
-         *
-         * @return string
-         */
-        public function totalVolumeByUserId($dateFrom = null, $dateTo = null)
-        {
-            $this->users = $this->getUsersArray();
-
-            $partners = [];
-            foreach ($this->users as $userData) {
-                $partners[$userData['partner_id']][] = $userData;
-            }
-
-            $parent = $this->userId;
-            $parentStack = [];
-            $lvl = 1;
-
-            $allChildUid = [];
-
-            if (!isset($partners[$parent])) {
-                return false;
-            }
-
-            while (($current = array_shift($partners[$parent])) || ($parent != $this->userId)) {
-                if (!$current) {
-                    $lvl--;
-                    $parent = array_pop($parentStack);
-                    continue;
-                }
-
-                $uid = $current['client_uid'];
-                $allChildUid[] = $uid;
-                if (!empty($partners[$uid])) {
-                    $parentStack[] = $parent;
-                    $parent = $uid;
-                    $lvl++;
-                }
-            }
-
-            $totalVolume = (new ReferralGrid($this->userId))
-                ->setDateFrom($dateFrom)
-                ->setDateTo($dateTo)
-                ->setUserIds($allChildUid)
-                ->totalVolumeAllReferralByUserIds();
-
-            return $this->output("Суммарный объем:  ".$totalVolume."\n".implode(',', $allChildUid)."\n");
-        }
-
-        /**
-         * Считаем прибыльность.
-         *
-         * @return string
-         */
-        public function totalProfitByUserId($dateFrom = null, $dateTo = null)
-        {
-            $this->users = $this->getUsersArray();
-
-            $partners = [];
-            foreach ($this->users as $userData) {
-                $partners[$userData['partner_id']][] = $userData;
-            }
-
-            $parent = $this->userId;
-            $parentStack = [];
-            $lvl = 1;
-
-            $allChildUid = [];
-
-            if (!isset($partners[$parent])) {
-                return false;
-            }
-
-            while (($current = array_shift($partners[$parent])) || ($parent != $this->userId)) {
-                if (!$current) {
-                    $lvl--;
-                    $parent = array_pop($parentStack);
-                    continue;
-                }
-
-                $uid = $current['client_uid'];
-                $allChildUid[] = $uid;
-                if (!empty($partners[$uid])) {
-                    $parentStack[] = $parent;
-                    $parent = $uid;
-                    $lvl++;
-                }
-            }
-
-            $totalVolume = (new ReferralGrid($this->userId))
-                ->setDateFrom($dateFrom)
-                ->setDateTo($dateTo)
-                ->setUserIds($allChildUid)
-                ->profitVolumeAllReferralByPartnerIds();
-
-            return $this->output("Прибыльность:  ".$totalVolume."\n".implode(',', $allChildUid)."\n");
-        }
-
-        /**
-         * Считаем всего всех рефералов.
-         *
-         * @return string
-         */
-        public function countReferralByUserId()
-        {
-            $this->users = $this->getUsersArray();
-
-            $partners = [];
-            foreach ($this->users as $userData) {
-                $partners[$userData['partner_id']][] = $userData;
-            }
-
-            $countReferrals = 0;
-            $parent = $this->userId;
-            $parentStack = [];
-
-            if (!isset($partners[$parent])) {
-                return false;
-            }
-
-            while (($current = array_shift($partners[$parent])) || ($parent != $this->userId)) {
-                if (!$current) {
-                    $parent = array_pop($parentStack);
-                    continue;
-                }
-
-                $uid = $current['client_uid'];
-                $countReferrals++;
-                if (!empty($partners[$uid])) {
-                    $parentStack[] = $parent;
-                    $parent = $uid;
-                }
-            }
-
-            return $this->output('Всего всех рефералов: '.$countReferrals."\n");
-        }
-
-        /**
-         * Считаем прямых рефералов.
-         *
-         * @return string
-         */
-        public function countDirectReferralByUserId()
-        {
-            $countReferrals = (new ReferralGrid($this->userId))
-                ->getArrayAllReferrals()
-                ->countDirectReferral();
-
-            return $this->output('Всего прямых рефералов: '.$countReferrals."\n");
-        }
-
-        /**
-         * Всего уровней реферальной сетки.
-         */
-        public function countLevelReferral()
-        {
-            $this->users = $this->getUsersArray();
-
-            $partners = [];
-            foreach ($this->users as $userData) {
-                $partners[$userData['partner_id']][] = $userData;
-            }
-
-            $parent = $this->userId;
-            $parentStack = [];
-            $lvl = 1;
-            $countLevelReferal = 0;
-
-            if (!isset($partners[$parent])) {
-                return false;
-            }
-
-            while (($current = array_shift($partners[$parent])) || ($parent != $this->userId)) {
-                if (!$current) {
-                    $lvl--;
-                    $parent = array_pop($parentStack);
-                    continue;
-                }
-
-                $uid = $current['client_uid'];
-                if (!empty($partners[$uid])) {
-                    $parentStack[] = $parent;
-                    $parent = $uid;
-                    $lvl++;
-                }
-
-                if ($countLevelReferal < $lvl) {
-                    $countLevelReferal++;
-                }
-            }
-
-            return $this->output('Всего уровней реферальной сетки: '.$countLevelReferal."\n");
-        }
-
-        /**
-         * Получим массив пользователей потенциально связанных
-         * с нашим userid.
-         *
-         * @return mixed
-         */
-        protected function getUsersArray()
-        {
-            return (new Referral($this->userId))
-                ->getArrayAllReferrals()
-                ->allReferrals;
-        }
-
-        /**
-         * Метод подготовки данных на вывод.
-         *
-         * @param $text
-         * @param string $option
-         *
-         * @return string
-         */
-        protected function output($text, $option = '')
-        {
-            if (isset(\Yii::$app->controller) && method_exists(\Yii::$app->controller, 'ansiFormat')) {
-                return $result = \Yii::$app->controller->ansiFormat($text, $option);
-            }
-
-            return $text;
-        }
-
-        /**
-         * Функция проверки на пустоту и валидность partnerId
-         * Открытие диалога на ввод partnerId в случае не удачи.
-         */
-        protected function checkUserId()
-        {
-            if (empty($this->userId) || is_numeric($this->userId) === false) {
-                if ($this->userId == 'q') {
-                    exit();
-                }
-
-                $this->output("-uid не может быть пустым и должен содержать число (enter q to exit) \n", Console::FG_RED);
-                $this->userId = BaseConsole::input('Введите -uid пользователя: ');
-                $callBackFuncName = debug_backtrace()[1]['function'];
-                $this->$callBackFuncName();
-
-                return false;
-            }
-
-            if (Users::find()->where(['client_uid' => $this->userId])->count() == 0) {
-                $this->output("Пользователь с данным идентификатором не найден! \n", Console::FG_RED);
-                $this->userId = '';
-                $callBackFuncName = debug_backtrace()[1]['function'];
-                $this->$callBackFuncName();
-
-                return false;
-            }
-
+    /**
+     * Проверим на существование заданного partnerId
+     * Открытие диалога на ввод partnerId в случае не удачи.
+     */
+    public function existsUserId()
+    {
+        if (User::ifExistsByUserId($this->userId)) {
             return true;
         }
     }
+}

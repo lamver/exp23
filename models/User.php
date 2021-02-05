@@ -19,7 +19,7 @@ namespace app\models;
  * @property int|null    $status
  * @property Accounts    $account
  */
-class Users extends \yii\db\ActiveRecord
+class User extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -65,6 +65,43 @@ class Users extends \yii\db\ActiveRecord
             'reg_date'   => 'Reg Date',
             'status'     => 'Status',
         ];
+    }
+
+    /**
+     * Проверяем есть ли у нас пользователем с запрошенным userId
+     *
+     * @param $userId
+     *
+     * @return bool
+     */
+    public static function ifExistsByUserId($userId) : int
+    {
+        return Self::find()->where(['client_uid' => $userId])->exists();
+    }
+
+    /**
+     * Получим массив всех пользователей
+     * с выборкой по запрошенному id конкретного пользователя и всех у кого есть значение в колонке partner_ir.
+     *
+     * @param $userId
+     *
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public static function getArrayHasReferralsBy($userId) : array
+    {
+        return Self::find()
+            ->select(['client_uid', 'partner_id'])
+            ->where(['client_uid' => $userId])
+            ->orWhere(['not', ['partner_id' => null]])
+            ->asArray()
+            ->all();
+    }
+
+    public static function countDirectReferralBy(int $userId) : int
+    {
+        return Self::find()->from(['u' => 'users'])
+        ->where(['u.partner_id' => $userId])
+        ->count();
     }
 
     /**

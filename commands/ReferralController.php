@@ -2,10 +2,11 @@
 
 namespace app\commands;
 
-use app\classes\ReferralMethods;
 use app\services\referral\ReferralGrid;
 use yii\console\Controller;
+use yii\helpers\BaseConsole;
 use yii\helpers\Console;
+
 
 class ReferralController extends Controller
 {
@@ -90,15 +91,71 @@ class ReferralController extends Controller
      */
     public function actionBuildTree()
     {
-        echo (new ReferralMethods())
-            ->setUserId($this->userId)
-            ->printBuildTree();
+        try {
+            $referralGrid = new ReferralGrid();
+            $this->stdout($this->printNode(
+                $referralGrid->setUserId($this->userId)->getUsersArrayHasRefferals()
+                )
+            );
+        }
+        catch (\Exception $e) {
+            $this->stdout("\n\n  Ошибка! ".$e->getMessage()."\n\n");
+
+            return BaseConsole::prompt('Введите uid пользователя: ', [
+                'required' => true,
+                'validator' => function($input) use ($referralGrid) {
+                    $referralGrid->setUserId($input);
+                    return (bool) $referralGrid->existsUserId();
+                },
+                'error' => 'Пользователь с данным uid не найден',
+            ]);
+        }
+
     }
 
-    public function actionTestTest(){
-        echo (new ReferralGrid())
-        ->setUserId($this->userId)
-            ->printBuildTree();
+    /**
+     * Дерево рефералов без рекурсии, строится циклом
+     * Метод печати структуры связей потомков реферальной системы (для вывода в консоли).
+     *
+     * @param array $users
+     * @return false|string
+     */
+    public function printNode(array $users)
+    {
+        $partners = [];
+        foreach ($users as $userData) {
+            $partners[$userData['partner_id']][] = $userData;
+        }
+
+        $parent = $this->userId;
+        $parentStack = [];
+        $lvl = 1;
+
+        $treeData = $this->ansiFormat("\n\n     ├── $this->userId\n", Console::FG_GREEN);
+
+        if (!isset($partners[$parent])) {
+            return $treeData.$this->ansiFormat("\n\n     Потомков не найдено\n\n", Console::FG_YELLOW);
+        }
+
+        while (($current = array_shift($partners[$parent])) || ($parent != $this->userId)) {
+            if (!$current) {
+                $lvl--;
+                $parent = array_pop($parentStack);
+                continue;
+            }
+
+            $uid = $current['client_uid'];
+            $treeData .= $this->ansiFormat('        '.str_repeat('   ├── ', $lvl)."$uid\n", Console::FG_GREY);
+            if (!empty($partners[$uid])) {
+                $parentStack[] = $parent;
+                $parent = $uid;
+                $lvl++;
+            }
+        }
+
+        $treeData .= $this->ansiFormat("\n\n", Console::FG_GREY);
+
+        return $treeData;
     }
 
     /**
@@ -107,9 +164,13 @@ class ReferralController extends Controller
      */
     public function actionTotalVolume()
     {
-        echo (new ReferralMethods())
+        $this->replaceUnderScoreParamDateTime();
+
+        $totalVolume = (new ReferralGrid())
             ->setUserId($this->userId)
             ->totalVolumeByUserId($this->dateFrom, $this->dateTo);
+
+        $this->stdout("\n\n     Суммарный объем:  ".$totalVolume."\n\n");
     }
 
     /**
@@ -117,27 +178,33 @@ class ReferralController extends Controller
      */
     public function actionTotalProfit()
     {
-        echo (new ReferralMethods())
+        $this->replaceUnderScoreParamDateTime();
+
+        $totalVolume = (new ReferralGrid())
             ->setUserId($this->userId)
             ->totalProfitByUserId($this->dateFrom, $this->dateTo);
+
+        $this->stdout("\n\n     Прибыльность:  ".$totalVolume."\n\n");
     }
 
     /**
-     * Экшен подсчета прямых и всех рефералов в зависимости от параметра --referralDirect.
+     * Экшен подсчета прямых и всех рефералов в зависимости от параметра --referralDirect или -refdir.
      */
     public function actionCountReferral()
     {
         if (empty($this->referralDirect)) {
-            echo (new ReferralMethods())
+            $countAllReferrals =  (new ReferralGrid())
                 ->setUserId($this->userId)
                 ->countReferralByUserId();
 
-            return true;
+            return $this->stdout("\n\n      Всего всех рефералов: $countAllReferrals\n\n", Console::FG_GREY);
         }
 
-        echo (new ReferralMethods())
+        $countDirectReferrals = (new ReferralGrid())
             ->setUserId($this->userId)
             ->countDirectReferralByUserId();
+
+        $this->stdout("\n\n      Всего прямых рефералов: $countDirectReferrals\n\n", Console::FG_GREY);
     }
 
     /**
@@ -145,9 +212,11 @@ class ReferralController extends Controller
      */
     public function actionCountLevel()
     {
-        echo (new ReferralMethods())
+        $countLevel = (new ReferralGrid())
             ->setUserId($this->userId)
             ->countLevelReferral();
+
+        $this->stdout("\n\n     Всего уровней реферальной сетки: $countLevel\n\n", Console::BOLD);
     }
 
     public function actionError()
@@ -165,6 +234,19 @@ class ReferralController extends Controller
         $memoryUse = memory_get_usage();
         $this->stdout('Memory use: '.number_format($memoryUse / 1024, 2).' kb ('.$memoryUse." byte).\n", Console::FG_PURPLE);
         flush();
-        echo 'Destroying '.__CLASS__."\n";
+        $this->stdout('Destroying '.__CLASS__."\n", Console::FG_GREY);
+    }
+
+    public function dialog() {
+        $this->output("Пользователь с данным идентификатором не найден! \n", Console::FG_RED);
+        $this->userId = '';
+        $callBackFuncName = debug_backtrace()[1]['function'];
+        $this->$callBackFuncName();
+    }
+
+    private function replaceUnderScoreParamDateTime()
+    {
+        $this->dateFrom = str_replace('_', ' ', $this->dateFrom);
+        $this->dateTo = str_replace('_', ' ', $this->To);
     }
 }

@@ -9,32 +9,12 @@ class Referral
     protected $partnerId;
     protected $counter = 0;
     protected $userIds = [];
-
-    public $allReferrals;
     public $dateFrom = [];
     public $dateTo = [];
 
     public function __construct($pid = 0)
     {
         $this->partnerId = $pid;
-    }
-
-    /**
-     * Получим массив всех пользователей
-     * с выборкой по запрошенному id конкретного пользователя и всех у кого есть значение в колонке partner_ir.
-     *
-     * @return $this
-     */
-    public function getArrayAllReferrals()
-    {
-        $this->allReferrals = Users::find()
-            ->select(['client_uid', 'partner_id'])
-            ->where(['client_uid' => $this->partnerId])
-            ->orWhere(['not', ['partner_id' => null]])
-            ->asArray()
-            ->all();
-
-        return $this;
     }
 
     /**
@@ -49,7 +29,8 @@ class Referral
         if (is_null($dateFrom)) {
             return $this;
         }
-        $this->dateFrom = ['>=', 't.close_time', str_replace('_', ' ', $dateFrom)];
+
+        $this->dateFrom = ['>=', 't.close_time', $dateFrom];
 
         return $this;
     }
@@ -66,7 +47,8 @@ class Referral
         if (is_null($dateTo)) {
             return $this;
         }
-        $this->dateTo = ['<=', 't.close_time', str_replace('_', ' ', $dateTo)];
+
+        $this->dateTo = ['<=', 't.close_time', $dateTo];
 
         return $this;
     }
@@ -79,7 +61,8 @@ class Referral
     }
 
     /**
-     * Метод вычесления общего объема по всем рефералам.
+     * Метод вычисления общего объема по всем рефералам.
+     * volume * coeff_h * coeff_cr
      *
      * @return bool|int|mixed|string|null
      */
@@ -97,9 +80,9 @@ class Referral
     }
 
     /**
-     * Метод вычесления общей прибыли по всем рефералам.
+     * Метод вычисления общей прибыли по всем рефералам.
      *
-     * @return bool|int|mixed|string|null
+     * @return int
      */
     public function profitVolumeAllReferralByPartnerIds()
     {
@@ -117,11 +100,8 @@ class Referral
     /**
      * Метод подсчета прямых рефералов.
      */
-    public function countDirectReferral()
+    public function countDirectReferral($userId)
     {
-        return (new Query())
-            ->from(['u' => 'users'])
-            ->where(['u.partner_id' => $this->partnerId])
-            ->count();
+        return User::countDirectReferralBy($userId);
     }
 }
