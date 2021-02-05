@@ -3,9 +3,11 @@
 namespace app\commands;
 
 use app\services\referral\ReferralGrid;
+use app\services\referral\calculator\CalculatorInterface;
 use yii\console\Controller;
 use yii\helpers\BaseConsole;
 use yii\helpers\Console;
+use yii;
 
 
 class ReferralController extends Controller
@@ -107,7 +109,7 @@ class ReferralController extends Controller
                     $referralGrid->setUserId($input);
                     return (bool) $referralGrid->existsUserId();
                 },
-                'error' => 'Пользователь с данным uid не найден',
+                'error' => \Yii::t('app/referral', 'user_not_found', ['user_Id' => $this->userId]),
             ]);
         }
 
@@ -166,9 +168,8 @@ class ReferralController extends Controller
     {
         $this->replaceUnderScoreParamDateTime();
 
-        $totalVolume = (new ReferralGrid())
-            ->setUserId($this->userId)
-            ->totalVolumeByUserId($this->dateFrom, $this->dateTo);
+        $totalVolume = Yii::$container->get(CalculatorInterface::class)
+            ->totalVolumeByUserId($this->userId, $this->dateFrom, $this->dateTo);
 
         $this->stdout("\n\n     Суммарный объем:  ".number_format($totalVolume, 4), Console::BOLD);
         $this->stdout("\n\n     Полное значение:  ".$totalVolume."\n\n", Console::FG_GREY);
@@ -181,12 +182,11 @@ class ReferralController extends Controller
     {
         $this->replaceUnderScoreParamDateTime();
 
-        $totalVolume = (new ReferralGrid())
-            ->setUserId($this->userId)
-            ->totalProfitByUserId($this->dateFrom, $this->dateTo);
+        $totalProfit = Yii::$container->get(CalculatorInterface::class)
+            ->sumProfitByUsersIDsAndBetweenDateTime($this->userId, $this->dateFrom, $this->dateTo);
 
-        $this->stdout("\n\n     Прибыльность:  ".number_format($totalVolume, 4), Console::BOLD);
-        $this->stdout("\n\n     Полное значение:  ".$totalVolume."\n\n", Console::FG_GREY);
+        $this->stdout("\n\n     Прибыльность:  ".number_format($totalProfit, 4), Console::BOLD);
+        $this->stdout("\n\n     Полное значение:  ".$totalProfit."\n\n", Console::FG_GREY);
     }
 
     /**
@@ -195,18 +195,15 @@ class ReferralController extends Controller
     public function actionCountReferral()
     {
         if (empty($this->referralDirect)) {
-            $countAllReferrals =  (new ReferralGrid())
-                ->setUserId($this->userId)
-                ->countReferralByUserId();
+            $countAllReferrals = Yii::$container->get(CalculatorInterface::class)->countReferralByUserId($this->userId);
 
-            return $this->stdout("\n\n      Всего всех рефералов: $countAllReferrals\n\n", Console::FG_GREY);
+            return $this->stdout("\n\n      Всего всех рефералов: $countAllReferrals\n\n", Console::BOLD);
         }
 
-        $countDirectReferrals = (new ReferralGrid())
-            ->setUserId($this->userId)
-            ->countDirectReferralByUserId();
+        $countDirectReferrals = Yii::$container->get(CalculatorInterface::class)
+                                        ->countDirectReferral($this->userId);
 
-        $this->stdout("\n\n      Всего прямых рефералов: $countDirectReferrals\n\n", Console::FG_GREY);
+        $this->stdout("\n\n      Всего прямых рефералов: $countDirectReferrals\n\n", Console::BOLD);
     }
 
     /**
@@ -214,9 +211,7 @@ class ReferralController extends Controller
      */
     public function actionCountLevel()
     {
-        $countLevel = (new ReferralGrid())
-            ->setUserId($this->userId)
-            ->countLevelReferral();
+        $countLevel = Yii::$container->get(CalculatorInterface::class)->countLevelsReferalToUserId($this->userId);
 
         $this->stdout("\n\n     Всего уровней реферальной сетки: $countLevel\n\n", Console::BOLD);
     }

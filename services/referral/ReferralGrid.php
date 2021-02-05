@@ -4,7 +4,6 @@ namespace app\services\referral;
 
 use app\models\User;
 use app\services\referral\calculator\CalculatorInterface;
-use app\services\referral\calculator\ReferralMetrika;
 use yii;
 
 class ReferralGrid
@@ -69,59 +68,6 @@ class ReferralGrid
         }
 
         return $node;
-    }
-
-    /**
-     * Считаем Суммарный объем.
-     *
-     * @return string
-     */
-    public function totalVolumeByUserId($dateFrom = null, $dateTo = null)
-    {
-        return Yii::$container->get(CalculatorInterface::class)
-            ->totalVolumeByUserId($this->userId, $dateFrom, $dateTo);
-    }
-
-    /**
-     * Получим прибыльность по всем рефералам
-     *
-     * @return string
-     */
-    public function totalProfitByUserId($dateFrom = null, $dateTo = null)
-    {
-        return Yii::$container->get(CalculatorInterface::class)
-            ->sumProfitByUsersIDsAndBetweenDateTime($this->userId, $dateFrom, $dateTo);
-    }
-
-    /**
-     * Считаем всего всех рефералов.
-     *
-     * @return string
-     */
-    public function countReferralByUserId()
-    {
-        return Yii::$container->get(CalculatorInterface::class)
-            ->countReferralByUserId($this->userId);
-    }
-
-    /**
-     * Считаем прямых рефералов.
-     *
-     * @return string
-     */
-    public function countDirectReferralByUserId()
-    {
-        return Yii::$container->get(CalculatorInterface::class)
-            ->countDirectReferral($this->userId);
-    }
-
-    /**
-     * Считаем количество уровней реферальной сетки.
-     */
-    public function countLevelReferral()
-    {
-        return Yii::$container->get(CalculatorInterface::class)
-            ->countLevelsReferalToUserId($this->userId);
     }
 
     /**
