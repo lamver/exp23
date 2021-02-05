@@ -170,7 +170,8 @@ class ReferralController extends Controller
             ->setUserId($this->userId)
             ->totalVolumeByUserId($this->dateFrom, $this->dateTo);
 
-        $this->stdout("\n\n     Суммарный объем:  ".$totalVolume."\n\n");
+        $this->stdout("\n\n     Суммарный объем:  ".number_format($totalVolume, 4), Console::BOLD);
+        $this->stdout("\n\n     Полное значение:  ".$totalVolume."\n\n", Console::FG_GREY);
     }
 
     /**
@@ -184,7 +185,8 @@ class ReferralController extends Controller
             ->setUserId($this->userId)
             ->totalProfitByUserId($this->dateFrom, $this->dateTo);
 
-        $this->stdout("\n\n     Прибыльность:  ".$totalVolume."\n\n");
+        $this->stdout("\n\n     Прибыльность:  ".number_format($totalVolume, 4), Console::BOLD);
+        $this->stdout("\n\n     Полное значение:  ".$totalVolume."\n\n", Console::FG_GREY);
     }
 
     /**
@@ -244,9 +246,10 @@ class ReferralController extends Controller
         $this->$callBackFuncName();
     }
 
-    private function replaceUnderScoreParamDateTime()
+    public function replaceUnderScoreParamDateTime()
     {
         $this->dateFrom = str_replace('_', ' ', $this->dateFrom);
-        $this->dateTo = str_replace('_', ' ', $this->To);
+        $this->dateTo = str_replace('_', ' ', $this->dateTo);
+        return $this;
     }
 }
