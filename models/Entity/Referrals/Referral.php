@@ -4,11 +4,7 @@
     namespace app\models\Entity\Referrals;
 
     use app\services\referral\calculator\CalculatorInterface;
-    use Yii;
-    use yii\base\InvalidConfigException;
-    use yii\db\ActiveQuery;
     use yii\db\ActiveRecord;
-    use yii\di\NotInstantiableException;
 
     /**
      * This is the model class for table "{{%event_places}}".
@@ -63,7 +59,7 @@
          *
          * @param $userId
          *
-         * @return array|\yii\db\ActiveRecord[]
+         * @return array|ActiveRecord[]
          */
         public static function getArrayHasReferralsBy($userId): array
         {

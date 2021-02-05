@@ -7,10 +7,10 @@
 
     class ReferralGrid
     {
-        protected $users = [];
-        protected $userId;
         public $dateFrom;
         public $dateTo;
+        protected $users = [];
+        protected $userId;
 
         /**
          * Установим свойство указанное идентификатор пользователя.
@@ -34,6 +34,17 @@
         }
 
         /**
+         * Проверим на существование заданного partnerId
+         * Открытие диалога на ввод partnerId в случае не удачи.
+         */
+        public function existsUserId()
+        {
+            if (User::ifExistsByUserId($this->userId)) {
+                return true;
+            }
+        }
+
+        /**
          * Получим всех потомков укзанного пользователя
          *
          * @return array
@@ -42,6 +53,17 @@
         {
             $this->users = $this->getUsersArrayHasRefferals();
             return $this->buildChildNodesByUsersArray($this->users, $this->userId);
+        }
+
+        /**
+         * Получим массив пользователей потенциально связанных
+         * с нашим userid.
+         *
+         * @return mixed
+         */
+        public function getUsersArrayHasRefferals()
+        {
+            return User::getArrayHasReferralsBy($this->userId);
         }
 
         /**
@@ -67,27 +89,5 @@
             }
 
             return $node;
-        }
-
-        /**
-         * Получим массив пользователей потенциально связанных
-         * с нашим userid.
-         *
-         * @return mixed
-         */
-        public function getUsersArrayHasRefferals()
-        {
-            return User::getArrayHasReferralsBy($this->userId);
-        }
-
-        /**
-         * Проверим на существование заданного partnerId
-         * Открытие диалога на ввод partnerId в случае не удачи.
-         */
-        public function existsUserId()
-        {
-            if (User::ifExistsByUserId($this->userId)) {
-                return true;
-            }
         }
     }

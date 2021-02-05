@@ -4,7 +4,6 @@
 
     use app\models\Referral;
     use app\models\User;
-    use app\services\referral\calculator\CalculatorInterface;
 
     class ReferralMetrika implements CalculatorInterface
     {
@@ -57,6 +56,18 @@
         }
 
         /**
+         * Получим всех пользователей потенциально участвующих в реферальной сети.
+         *
+         * @param int $userId
+         *
+         * @return array
+         */
+        private function getUserArrayHasReferral(int $userId): array
+        {
+            return User::getArrayHasReferralsBy($userId);
+        }
+
+        /**
          * Посчитаем количество всех рефералов у пользователя.
          *
          * @param int $userId
@@ -94,18 +105,6 @@
             }
 
             return $countReferrals;
-        }
-
-        /**
-         * Получим всех пользователей потенциально участвующих в реферальной сети.
-         *
-         * @param int $userId
-         *
-         * @return array
-         */
-        private function getUserArrayHasReferral(int $userId) : array
-        {
-            return User::getArrayHasReferralsBy($userId);
         }
 
         /**
