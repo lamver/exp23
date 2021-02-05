@@ -13,15 +13,17 @@
     /**
      * BoardBootstrap
      */
-    class ReferralBootstrap implements BootstrapInterface{
+    class ReferralBootstrap implements BootstrapInterface
+    {
 
-        public function bootstrap($app){
+        public function bootstrap($app)
+        {
 
             $container = \Yii::$container;
 
             $container->setSingleton('CalculatorInterface');
 
-            $container->set('app\services\referral\calculator\CalculatorInterface', function() {
+            $container->set('app\services\referral\calculator\CalculatorInterface', function () {
                 return new ReferralMetrika();
             });
         }

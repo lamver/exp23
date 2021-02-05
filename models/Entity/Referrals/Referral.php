@@ -52,7 +52,7 @@
          *
          * @return bool
          */
-        public static function ifExistsByUserId($userId) : int
+        public static function ifExistsByUserId($userId): int
         {
             return Self::find()->where(['client_uid' => $userId])->exists();
         }
@@ -65,7 +65,7 @@
          *
          * @return array|\yii\db\ActiveRecord[]
          */
-        public static function getArrayHasReferralsBy($userId) : array
+        public static function getArrayHasReferralsBy($userId): array
         {
             return Self::find()
                 ->select(['client_uid', 'partner_id'])
@@ -82,7 +82,7 @@
          * @param int $userId
          * @return int
          */
-        public static function countDirectReferralBy(int $userId) : int
+        public static function countDirectReferralBy(int $userId): int
         {
             return Self::find()->from(['u' => 'users'])
                 ->where(['u.partner_id' => $userId])
