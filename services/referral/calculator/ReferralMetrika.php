@@ -7,7 +7,6 @@
 
     class ReferralMetrika implements CalculatorInterface
     {
-
         /**
          * Считаем прибыльность.
          *

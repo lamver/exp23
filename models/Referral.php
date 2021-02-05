@@ -69,7 +69,6 @@
         public function totalVolumeAllReferralByUserIds()
         {
             return (new Query())
-                //->select('(t.volume * t.coeff_h * t.coeff_cr) as volume')
                 ->from(['u' => 'users'])
                 ->leftJoin(['a' => 'accounts'], 'a.client_uid = u.client_uid')
                 ->leftJoin(['t' => 'trades'], 't.login = a.login')

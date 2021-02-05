@@ -17,12 +17,9 @@
         public $dateFrom;
         public $dateTo;
         public $referralDirect;
-        private $timeLogs;
-        private $startTimeScript;
 
         public function init()
         {
-            $this->startTimeScript = microtime(true);
             parent::init();
         }
 
@@ -274,16 +271,10 @@
         public function __destruct()
         {
             $this->stdout(
-                "Duration \n" . $this->timeLogs . 'Full time: ' . (microtime(
-                        true
-                    ) - $this->startTimeScript) . " sec.\n",
-                Console::FG_PURPLE
+                "\n\n   Success final \n\n",
+                Console::FG_GREEN
             );
-            $memoryUse = memory_get_usage();
-            $this->stdout(
-                'Memory use: ' . number_format($memoryUse / 1024, 2) . ' kb (' . $memoryUse . " byte).\n",
-                Console::FG_PURPLE
-            );
+
             flush();
             $this->stdout('Destroying ' . __CLASS__ . "\n", Console::FG_GREY);
         }
