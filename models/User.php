@@ -97,6 +97,13 @@ class User extends \yii\db\ActiveRecord
             ->all();
     }
 
+    /**
+     * Получим количество прямых реералов
+     * понимаются те, у кого в partner_id стоит client_uid клиента.
+     *
+     * @param int $userId
+     * @return int
+     */
     public static function countDirectReferralBy(int $userId) : int
     {
         return Self::find()->from(['u' => 'users'])
