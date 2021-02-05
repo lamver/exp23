@@ -32,19 +32,19 @@ php yii referral/build-tree -uid=82824897
 
 #### referral/total-volume
 Посчитать суммарный объем volume * coeff_h * coeff_cr по всем уровням реферальной системы за период времени:
-(-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:
+(-uid - обязательный параметр, -datefrom и -dateto не обязательные параметры) Пример:
 
 ```
-php yii referral/total-volume -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00
+php yii referral/total-volume -uid=82824897 -datefrom=2018-01-01_16:12:10 -dateto=2019-01-01_17:00
 ```
 
 
 #### referral/total-profit
 Посчитать прибыльность (сумма profit) за определенный период времени:
-(-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:
+(-uid - обязательный параметр, -datefrom и -dateto не обязательные параметры) Пример:
 
 ```
-php yii referral/total-profit -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00
+php yii referral/total-profit -uid=82824897 -datefrom=2018-01-01_16:12:10 -dateto=2019-01-01_17:00
 ```
 
 
