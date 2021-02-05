@@ -1,12 +1,14 @@
 <?php
 
 
-    namespace yii\config\bootstrap;
+    namespace app\config\bootstrap;
 
+    use app\services\referral\calculator\ReferralMetrika;
     use yii;
     use yii\base\BootstrapInterface;
     use yii\di\Container;
     use frontend\storages\BoardDaoStorage;
+    use app\services\referral\calculator\CalculatorInterface;
 
     /**
      * BoardBootstrap
@@ -20,7 +22,7 @@
             $container->setSingleton('CalculatorInterface');
 
             $container->set('app\services\referral\calculator\CalculatorInterface', function() {
-                return new CalculatorInterface();
+                return new ReferralMetrika();
             });
         }
 

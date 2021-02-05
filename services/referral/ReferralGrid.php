@@ -3,6 +3,7 @@
 namespace app\services\referral;
 
 use app\models\User;
+use app\services\referral\calculator\CalculatorInterface;
 use app\services\referral\calculator\ReferralMetrika;
 use yii;
 
@@ -77,7 +78,8 @@ class ReferralGrid
      */
     public function totalVolumeByUserId($dateFrom = null, $dateTo = null)
     {
-        return (new ReferralMetrika())->totalVolumeByUserId($this->userId, $dateFrom, $dateTo);
+        return Yii::$container->get(CalculatorInterface::class)
+            ->totalVolumeByUserId($this->userId, $dateFrom, $dateTo);
     }
 
     /**
@@ -87,7 +89,8 @@ class ReferralGrid
      */
     public function totalProfitByUserId($dateFrom = null, $dateTo = null)
     {
-        return (new ReferralMetrika())->sumProfitByUsersIDsAndBetweenDateTime($this->userId, $dateFrom, $dateTo);
+        return Yii::$container->get(CalculatorInterface::class)
+            ->sumProfitByUsersIDsAndBetweenDateTime($this->userId, $dateFrom, $dateTo);
     }
 
     /**
@@ -97,7 +100,8 @@ class ReferralGrid
      */
     public function countReferralByUserId()
     {
-        return (new ReferralMetrika())->countReferralByUserId($this->userId);
+        return Yii::$container->get(CalculatorInterface::class)
+            ->countReferralByUserId($this->userId);
     }
 
     /**
@@ -107,7 +111,8 @@ class ReferralGrid
      */
     public function countDirectReferralByUserId()
     {
-        return (new ReferralMetrika())->countDirectReferral($this->userId);
+        return Yii::$container->get(CalculatorInterface::class)
+            ->countDirectReferral($this->userId);
     }
 
     /**
@@ -115,7 +120,8 @@ class ReferralGrid
      */
     public function countLevelReferral()
     {
-        return (new ReferralMetrika())->countLevelsReferalToUserId($this->userId);
+        return Yii::$container->get(CalculatorInterface::class)
+            ->countLevelsReferalToUserId($this->userId);
     }
 
     /**

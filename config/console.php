@@ -9,7 +9,7 @@ $config = [
     'language' => 'ru',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log',
-        //'yii\config\ReferralBootstrap'
+        'app\config\bootstrap\ReferralBootstrap'
     ],
     'controllerNamespace' => 'app\commands',
     'aliases' => [
