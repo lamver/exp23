@@ -35,7 +35,7 @@ php yii referral/build-tree -uid=82824897
 (-uid - обязательный параметр, -datefrom и -dateto не обязательные параметры) Пример:
 
 ```
-php yii referral/total-volume -uid=82824897 -datefrom=2018-01-01_16:12:10 -dateto=2019-01-01_17:00
+php yii referral/total-volume -uid=82824897 -date_from=2018-01-01_16:12:10 -date_to=2019-01-01_17:00
 ```
 
 
@@ -44,7 +44,7 @@ php yii referral/total-volume -uid=82824897 -datefrom=2018-01-01_16:12:10 -datet
 (-uid - обязательный параметр, -datefrom и -dateto не обязательные параметры) Пример:
 
 ```
-php yii referral/total-profit -uid=82824897 -datefrom=2018-01-01_16:12:10 -dateto=2019-01-01_17:00
+php yii referral/total-profit -uid=82824897 -date_from=2018-01-01_16:12:10 -date_to=2019-01-01_17:00
 ```
 
 

@@ -221,15 +221,6 @@ class ReferralController extends Controller
         $this->stdout("\n\n     Всего уровней реферальной сетки: $countLevel\n\n", Console::BOLD);
     }
 
-    public function actionError()
-    {
-        $this->stdout("\n\n test");
-        $exception = \Yii::$app->errorHandler->exception;
-        if ($exception !== null) {
-            $this->stdout('error', ['exception' => $exception]);
-        }
-    }
-
     public function __destruct()
     {
         $this->stdout("Duration \n".$this->timeLogs.'Full time: '.(microtime(true) - $this->startTimeScript)." sec.\n", Console::FG_PURPLE);
@@ -239,13 +230,11 @@ class ReferralController extends Controller
         $this->stdout('Destroying '.__CLASS__."\n", Console::FG_GREY);
     }
 
-    public function dialog() {
-        $this->output("Пользователь с данным идентификатором не найден! \n", Console::FG_RED);
-        $this->userId = '';
-        $callBackFuncName = debug_backtrace()[1]['function'];
-        $this->$callBackFuncName();
-    }
-
+    /**
+     * Уберем нижнее подчеркивание у параметров даты времи от и до.
+     *
+     * @return $this
+     */
     public function replaceUnderScoreParamDateTime()
     {
         $this->dateFrom = str_replace('_', ' ', $this->dateFrom);
