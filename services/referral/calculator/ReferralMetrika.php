@@ -184,7 +184,6 @@
 
             $parent = $userId;
             $parentStack = [];
-            $lvl = 1;
 
             $allChildUid = [];
 
@@ -194,7 +193,6 @@
 
             while (($current = array_shift($partners[$parent])) || ($parent != $userId)) {
                 if (!$current) {
-                    $lvl--;
                     $parent = array_pop($parentStack);
                     continue;
                 }
@@ -204,7 +202,6 @@
                 if (!empty($partners[$uid])) {
                     $parentStack[] = $parent;
                     $parent = $uid;
-                    $lvl++;
                 }
             }
 
