@@ -8,6 +8,7 @@ class Referral
 {
     protected $partnerId;
     protected $counter = 0;
+    protected $userIds = [];
 
     public $allReferrals;
     public $dateFrom = [];
@@ -18,7 +19,7 @@ class Referral
         $this->partnerId = $pid;
     }
 
-    /** @phpdoc
+    /**
      * Получим массив всех пользователей
      * с выборкой по запрошенному id конкретного пользователя и всех у кого есть значение в колонке partner_ir.
      *
@@ -70,18 +71,26 @@ class Referral
         return $this;
     }
 
+    public function setUserIds(array $userIds = [])
+    {
+        $this->userIds = $userIds;
+
+        return $this;
+    }
+
     /**
      * Метод вычесления общего объема по всем рефералам.
      *
      * @return bool|int|mixed|string|null
      */
-    public function totalVolumeAllReferralByPartnerID()
+    public function totalVolumeAllReferralByUserIds()
     {
         return (new Query())
+            //->select('(t.volume * t.coeff_h * t.coeff_cr) as volume')
             ->from(['u' => 'users'])
             ->leftJoin(['a' => 'accounts'], 'a.client_uid = u.client_uid')
             ->leftJoin(['t' => 'trades'], 't.login = a.login')
-            ->where(['u.client_uid' => $this->partnerId])
+            ->where(['in', 'u.client_uid', implode(",", $this->userIds)])
             ->andWhere($this->dateFrom)
             ->andWhere($this->dateTo)
             ->sum('(t.volume * t.coeff_h * t.coeff_cr)');
@@ -92,16 +101,17 @@ class Referral
      *
      * @return bool|int|mixed|string|null
      */
-    public function profitVolumeAllReferralByPartnerID()
+    public function profitVolumeAllReferralByPartnerIds()
     {
         return (new Query())
+            ///->select('(t.volume * t.coeff_h * t.coeff_cr) as volume')
             ->from(['u' => 'users'])
             ->leftJoin(['a' => 'accounts'], 'a.client_uid = u.client_uid')
             ->leftJoin(['t' => 'trades'], 't.login = a.login')
-            ->where(['u.client_uid' => $this->partnerId])
+            ->where(['in', 'u.client_uid', implode(",", $this->userIds)])
             ->andWhere($this->dateFrom)
             ->andWhere($this->dateTo)
-            ->sum('profit');
+            ->sum('t.profit');
     }
 
     /**

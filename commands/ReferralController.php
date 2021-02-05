@@ -3,6 +3,7 @@
 namespace app\commands;
 
 use app\classes\ReferralMethods;
+use app\services\referral\ReferralGrid;
 use yii\console\Controller;
 use yii\helpers\Console;
 
@@ -40,19 +41,11 @@ class ReferralController extends Controller
     {
         return [
             'uid'    => 'userId',
-            'dfrom'  => 'dateFrom',
-            'dto'    => 'dateTo',
+            'date_from'  => 'dateFrom',
+            'date_to'    => 'dateTo',
             'refdir' => 'referralDirect',
         ];
     }
-
-    public function rules()
-    {
-        return [
-            [['userId'], "required"],
-        ];
-    }
-
 
     public function actionIndex()
     {
@@ -73,13 +66,13 @@ class ReferralController extends Controller
 
         $this->stdout("\n|  referral/total-volume", Console::FG_YELLOW);
         $this->stdout("\n|  Посчитать суммарный объем volume * coeff_h * coeff_cr по всем уровням реферальной системы за период времени:\n", Console::FG_GREY);
-        $this->stdout("|  (-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
-        $this->stdout("\n|  php yii referral/total-volume -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
+        $this->stdout("|  (-uid - обязательный параметр, -date_from и -date_to не обязательные параметры) Пример:\n", Console::FG_GREY);
+        $this->stdout("\n|  php yii referral/total-volume -uid=82824897 -date_from=2018-01-01_16:12:10 -date_to=2019-01-01_17:00\n\n");
 
         $this->stdout("\n|  referral/total-profit", Console::FG_YELLOW);
         $this->stdout("\n|  Посчитать прибыльность (сумма profit) за определенный период времени:\n", Console::FG_GREY);
-        $this->stdout("|  (-uid - обязательный параметр, -dfrom и -dto не обязательные параметры) Пример:\n", Console::FG_GREY);
-        $this->stdout("\n|  php yii referral/total-profit -uid=82824897 -dfrom=2018-01-01_16:12:10 -dto=2019-01-01_17:00\n\n");
+        $this->stdout("|  (-uid - обязательный параметр, -date_from и -date_to не обязательные параметры) Пример:\n", Console::FG_GREY);
+        $this->stdout("\n|  php yii referral/total-profit -uid=82824897 -date_from=2018-01-01_16:12:10 -date_to=2019-01-01_17:00\n\n");
 
         $this->stdout("\n|  referral/count-referral", Console::FG_YELLOW);
         $this->stdout("\n|  Посчитать количество прямых рефералов и количество всех рефералов клиента:\n", Console::FG_GREY);
@@ -102,6 +95,12 @@ class ReferralController extends Controller
             ->printBuildTree();
     }
 
+    public function actionTestTest(){
+        echo (new ReferralGrid())
+        ->setUserId($this->userId)
+            ->printBuildTree();
+    }
+
     /**
      * Экшен получения суммарного объема volume * coeff_h * coeff_cr
      * по всем уровням реферальной системы за период времени.
@@ -110,7 +109,7 @@ class ReferralController extends Controller
     {
         echo (new ReferralMethods())
             ->setUserId($this->userId)
-            ->totalVolumeByUserId();
+            ->totalVolumeByUserId($this->dateFrom, $this->dateTo);
     }
 
     /**
@@ -120,7 +119,7 @@ class ReferralController extends Controller
     {
         echo (new ReferralMethods())
             ->setUserId($this->userId)
-            ->totalProfitByUserId();
+            ->totalProfitByUserId($this->dateFrom, $this->dateTo);
     }
 
     /**
