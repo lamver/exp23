@@ -4,11 +4,7 @@
     namespace app\config\bootstrap;
 
     use app\services\referral\calculator\ReferralMetrika;
-    use yii;
     use yii\base\BootstrapInterface;
-    use yii\di\Container;
-    use frontend\storages\BoardDaoStorage;
-    use app\services\referral\calculator\CalculatorInterface;
 
     /**
      * BoardBootstrap
