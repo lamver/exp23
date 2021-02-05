@@ -4,11 +4,10 @@ namespace app\commands;
 
 use app\services\referral\ReferralGrid;
 use app\services\referral\calculator\CalculatorInterface;
+use yii;
 use yii\console\Controller;
 use yii\helpers\BaseConsole;
 use yii\helpers\Console;
-use yii;
-
 
 class ReferralController extends Controller
 {
