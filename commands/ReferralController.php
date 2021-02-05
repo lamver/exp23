@@ -237,8 +237,15 @@ class ReferralController extends Controller
      */
     public function replaceUnderScoreParamDateTime()
     {
-        $this->dateFrom = str_replace('_', ' ', $this->dateFrom);
-        $this->dateTo = str_replace('_', ' ', $this->dateTo);
+        if (!is_null($this->dateFrom)) {
+            $this->dateFrom = str_replace('_', ' ', $this->dateFrom);
+        }
+
+        if (!is_null($this->dateFrom)) {
+            $this->dateTo = str_replace('_', ' ', $this->dateTo);
+        }
+
+
         return $this;
     }
 }
