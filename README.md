@@ -69,7 +69,6 @@ php yii referral/total-volume -uid=82824897 -date_from=2018-01-01_16:12:10 -date
 
      Полное значение:  2205.756225419274
 
-
 ```
 
 #### referral/total-profit
@@ -80,6 +79,14 @@ php yii referral/total-volume -uid=82824897 -date_from=2018-01-01_16:12:10 -date
 php yii referral/total-profit -uid=82824897 -date_from=2018-01-01_16:12:10 -date_to=2019-01-01_17:00
 ```
 
+#### Результат 
+```
+
+     Прибыльность:  164,468.7602
+
+     Полное значение:  164468.76021897793
+
+```
 
 #### referral/count-referral
 Посчитать количество прямых рефералов и количество всех рефералов клиента:
@@ -89,6 +96,12 @@ php yii referral/total-profit -uid=82824897 -date_from=2018-01-01_16:12:10 -date
 php yii referral/count-referral -uid=82824897 -refdir=1
 ```
 
+#### Результат 
+```
+
+      Всего прямых рефералов: 14
+
+```
 
 #### referral/count-level
 Посчитать количество уровней реферальной сетки:
@@ -98,3 +111,9 @@ php yii referral/count-referral -uid=82824897 -refdir=1
 php yii referral/count-level -uid=82824897
 ```
 
+#### Результат 
+```
+
+      Всего уровней реферальной сетки: 4
+
+```
