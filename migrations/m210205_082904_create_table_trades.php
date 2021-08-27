@@ -15,7 +15,6 @@
             $this->createTable(
                 '{{%trades}}',
                 [
-
                     'id' => $this->primaryKey()->notNull(),
                     'ticket' => $this->integer(11),
                     'login' => $this->integer(11),
@@ -27,7 +26,6 @@
                     'profit' => $this->float(),
                     'coeff_h' => $this->float(),
                     'coeff_cr' => $this->float(),
-
                 ]
             );
         }

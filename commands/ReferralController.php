@@ -10,7 +10,10 @@
     use yii\helpers\BaseConsole;
     use yii\helpers\Console;
 
-
+    /**
+     * Class ReferralController
+     * @package app\commands
+     */
     class ReferralController extends Controller
     {
         public $userId;

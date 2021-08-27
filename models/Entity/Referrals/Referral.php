@@ -1,6 +1,5 @@
 <?php
 
-
     namespace app\models\Entity\Referrals;
 
     use app\services\referral\calculator\CalculatorInterface;
@@ -48,7 +47,7 @@
          *
          * @return bool
          */
-        public static function ifExistsByUserId($userId): int
+        public static function ifExistsByUserId($userId): bool
         {
             return Self::find()->where(['client_uid' => $userId])->exists();
         }

@@ -1,6 +1,5 @@
 <?php
 
-
     namespace app\config\bootstrap;
 
     use app\services\referral\calculator\ReferralMetrika;
@@ -12,7 +11,9 @@
      */
     class ReferralBootstrap implements BootstrapInterface
     {
-
+        /**
+         * @param \yii\base\Application $app
+         */
         public function bootstrap($app)
         {
             $container = Yii::$container;

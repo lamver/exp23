@@ -5,6 +5,10 @@
     use app\models\User;
     use yii;
 
+    /**
+     * Class ReferralGrid
+     * @package app\services\referral
+     */
     class ReferralGrid
     {
         public $dateFrom;

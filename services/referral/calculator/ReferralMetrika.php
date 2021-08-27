@@ -5,6 +5,10 @@
     use app\models\Referral;
     use app\models\User;
 
+    /**
+     * Class ReferralMetrika
+     * @package app\services\referral\calculator
+     */
     class ReferralMetrika implements CalculatorInterface
     {
         /**
@@ -124,7 +128,7 @@
          * @param int $userId
          * @return int
          */
-        public function countLevelsReferalToUserId(int $userId): int
+        public function countLevelsReferralToUserId(int $userId): int
         {
             $users = $this->getUserArrayHasReferral($userId);
 

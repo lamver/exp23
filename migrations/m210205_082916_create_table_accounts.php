@@ -15,7 +15,6 @@
             $this->createTable(
                 '{{%accounts}}',
                 [
-
                     'id' => $this->primaryKey()->notNull(),
                     'client_uid' => $this->integer(11),
                     'login' => $this->integer(11),

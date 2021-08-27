@@ -2,7 +2,10 @@
 
     namespace app\services\referral\calculator;
 
-
+    /**
+     * Interface CalculatorInterface
+     * @package app\services\referral\calculator
+     */
     interface CalculatorInterface
     {
         /**
@@ -37,7 +40,7 @@
          *
          * @return int
          */
-        public function countLevelsReferalToUserId(int $userId): int;
+        public function countLevelsReferralToUserId(int $userId): int;
 
         /**
          * Посчитаем суммарный объем по всем рефералам по запрошенному пользователю.

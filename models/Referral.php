@@ -4,6 +4,10 @@
 
     use yii\db\Query;
 
+    /**
+     * Class Referral
+     * @package app\models
+     */
     class Referral
     {
         protected $partnerId;

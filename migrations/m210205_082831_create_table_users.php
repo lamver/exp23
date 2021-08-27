@@ -15,7 +15,6 @@
             $this->createTable(
                 '{{%users}}',
                 [
-
                     'id' => $this->primaryKey()->notNull(),
                     'client_uid' => $this->integer(11),
                     'email' => $this->string(100),
@@ -28,7 +27,6 @@
                     'partner_id' => $this->integer(11),
                     'reg_date' => $this->datetime(),
                     'status' => $this->integer(11),
-
                 ]
             );
         }
